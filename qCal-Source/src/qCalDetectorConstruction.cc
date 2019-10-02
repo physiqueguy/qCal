@@ -392,7 +392,7 @@ G4VPhysicalVolume* qCalDetectorConstruction::Construct()
    G4LogicalSkinSurface *quartzSurface = new G4LogicalSkinSurface("QuartzSurface", logicQuartz, quartzWrap);
    quartzWrap->SetType(dielectric_metal); 
    quartzWrap->SetModel(unified);
-   quartzWrap->SetFinish(polishedtyvekair);
+   quartzWrap->SetFinish(polished);
 
    new G4LogicalBorderSurface("QuartzWrap",
                               quartzPlace,
