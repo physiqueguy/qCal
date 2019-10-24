@@ -73,6 +73,7 @@ private:
    G4double p_PMTBackDim;
    G4LogicalVolume* logicSiPM;
    G4double negHalfDetSize;
+   G4double p_sensDetecDepth;
    //The SiPM SDs:
    G4Cache<qCalSD*> fSiPM_SD;
    std::vector<G4ThreeVector> fSiPMPositions;
