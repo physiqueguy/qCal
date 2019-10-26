@@ -320,7 +320,7 @@ G4VPhysicalVolume* qCalDetectorConstruction::Construct()
 
    G4LogicalVolume* logicFullDetector  = new G4LogicalVolume(solidFullDetector,
                                                              airMat,
-                                                             "logicFinal");
+                                                             "logicFullDetector");
 
 
    G4ThreeVector absPos = G4ThreeVector(0,
@@ -356,7 +356,7 @@ G4VPhysicalVolume* qCalDetectorConstruction::Construct()
                    logicFullDetector,           //Mother volume
                    kZAxis,                      //Axis of replication
                    (p_nZAxis),                  //Number of replica
-                   2*(((p_fQuartzDepth + p_fAbsLen)) + (2*p_sensDetecDepth) + (p_PMTBackDim))); //Width of replica //+0.25
+                   2*(((p_fQuartzDepth + p_fAbsLen)) + (p_sensDetecDepth) + (p_PMTBackDim))); //Width of replica //+0.25
 
    new G4PVPlacement(nullptr,                   //no rotation
                      G4ThreeVector(0, 0, 0),    //at (0,0,0)
@@ -444,13 +444,14 @@ G4int qCalDetectorConstruction::RawCoordsToSiPMNumber(const G4ThreeVector &raw){
    G4int nXAxisIsEven = 1 - p_nXAxis%2;
    G4int nYAxisIsEven = 1 - p_nYAxis%2;
    G4int nZAxisIsEven = 1 - p_nZAxis%2;
-   G4double rx = raw.getX() / (p_sdCubeSize/cm) +0.5 * nXAxisIsEven;
-   G4double ry = raw.getY() / (p_sdCubeSize/cm) +0.5 * nYAxisIsEven;
+   G4double rx = raw.getX() / (p_sdCubeSize) +0.5 * nXAxisIsEven;
+   G4double ry = raw.getY() / (p_sdCubeSize) +0.5 * nYAxisIsEven;
    G4double rz = (raw.getZ() - p_foffsetZ )/p_fscaleZ -nZAxisIsEven;
    // (rx, ry, rz) are then re-centered in a detector corner so that all components are positive:
-   G4double cx = rx + floor(0.5*p_nXAxis);
+   int vol = (p_nXAxis * p_nYAxis * p_nZAxis);
+   G4double cx = (rx + floor(0.5*p_nXAxis));
    G4double cy = ry + floor(0.5*p_nYAxis);
    G4double cz = rz + floor(0.5*p_nZAxis);
    // The output id value counts the SiPMs layer-wise from the starting corner:
-   return (int)round(cx + p_nXAxis*cy + p_nXAxis*p_nYAxis*cz);
+   return (int)round(cx + p_nXAxis*cy + p_nXAxis*p_nYAxis*cz)%vol;
 }

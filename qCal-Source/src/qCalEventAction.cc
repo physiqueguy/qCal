@@ -198,9 +198,11 @@ void qCalEventAction::EndOfEventAction(const G4Event* anEvent)
       // Clear histogram of hit times:
       analysisManager->GetH1(0)->reset();
    }
+
    // Adds the events photon count to the histogram:
    analysisManager->FillH1(1, i_totalPhotonCount);
    // Update all the root ntuples:
+
    analysisManager->AddNtupleRow();
 
    // Reset the SiPM counts and Hit Times to zero for a new event.
@@ -210,6 +212,7 @@ void qCalEventAction::EndOfEventAction(const G4Event* anEvent)
       fFinalHitTimes[i] = -1.;
       fInitialHitTimes[i] = -1.;
    }
+
 }
 
 
