@@ -48,15 +48,19 @@ qCalDetectorConstruction::qCalDetectorConstruction(G4int nXAxis,                
    p_fQuartzDepth = (fCubeDepth)/2;
    p_fQuartzSpacing = 0.0; //0.001*cm;                                                             //Width between x-cubes (circuit board + sipm)
    p_fWrapSize = 0.025*cm; //0.001*cm;                                                             //Width of the tyvek wrapping
-   p_fAbsXDim = ((p_fCubeWidth + 2 * p_fWrapSize + p_fQuartzSpacing) * p_nXAxis) / 2;              //Detector X coord center
-   p_fAbsYDim = ((p_fCubeWidth + 2 * p_fWrapSize + p_fQuartzSpacing) * p_nYAxis) / 2;              //Detector Y coord Center
-   p_fAbsZDim = ((p_fCubeWidth + 2 * p_fWrapSize + p_fQuartzSpacing + p_fAbsLen) * p_nZAxis) / 4;  //Detector Z coord Center
+   p_fAbsXDim = (((p_fCubeWidth*2) + (2 * p_fWrapSize) + p_fQuartzSpacing) * p_nXAxis) / 2;              //Detector X coord center
+   p_fAbsYDim = (((p_fCubeWidth*2) + (2 * p_fWrapSize) + p_fQuartzSpacing) * p_nYAxis) / 2;              //Detector Y coord Center
+   p_fAbsZDim = ((p_nZAxis)*(((p_fQuartzDepth + p_fAbsLen)) + (2*p_sensDetecDepth) + (p_PMTBackDim))) + (0.25*cm);//((p_fCubeWidth + 2 * p_fWrapSize + p_fQuartzSpacing + p_fAbsLen) * p_nZAxis) / 4;  //Detector Z coord Center
+   //Definitely might have gogtn changed
    p_SiPMDim =  (fDetecWidth)/2;        //48.5*mm;                                                                            //Dimension of SiPM
-   p_sdCubeSize = (p_fCubeWidth + 2 * p_fWrapSize + p_fQuartzSpacing)/2;
+   p_sdCubeSize = p_fCubeWidth;//((p_fCubeWidth*2) + (2 * p_fWrapSize) + p_fQuartzSpacing)/2;
    p_PMTBackDim = (fPMTBackDepth)/2;
-   p_fscaleZ = (p_fAbsLen + p_sdCubeSize)/cm;
-   p_sensDetecDepth = 0.001*cm;
+   p_fscaleZ = 0.0;
+   p_sensDetecDepth = (0.001*cm);
    negHalfDetSize = ((((p_nZAxis)*(((p_fQuartzDepth + p_fAbsLen)) + (2*p_sensDetecDepth) + (p_PMTBackDim))) + (0.25*cm)));
+
+
+
 }
 
 qCalDetectorConstruction::~qCalDetectorConstruction() = default;
@@ -64,6 +68,11 @@ qCalDetectorConstruction::~qCalDetectorConstruction() = default;
 
 G4VPhysicalVolume* qCalDetectorConstruction::Construct()
 {
+
+
+
+
+
    ////////////////////////////////////////////////////////////////////////////////////////////////
    //Creating the materials and initial values
    ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -163,7 +172,8 @@ G4VPhysicalVolume* qCalDetectorConstruction::Construct()
                                              p_fAbsXDim + p_fCubeWidth,
                                              p_fAbsYDim + p_fCubeWidth,
                                              ((p_nZAxis)*(((p_fQuartzDepth + p_fAbsLen)) + (2*p_sensDetecDepth) + (p_PMTBackDim))) + zDetOff);
-   //((p_nZAxis)*(p_fAbsZDim + p_fQuartzDepth + p_PMTBackDim)) + zDetOff);
+//      ((p_nZAxis)*(((p_fQuartzDepth + p_fAbsLen)) + (2*p_sensDetecDepth) + (p_PMTBackDim))) + zDetOff);
+
 
    G4LogicalVolume* worldLog     = new G4LogicalVolume(solidWorld,
                                                        airMat,
@@ -199,7 +209,7 @@ G4VPhysicalVolume* qCalDetectorConstruction::Construct()
    G4Box* solidSiPM = new G4Box("solidSiPM",
                                 p_SiPMDim,
                                 p_SiPMDim,
-                                0.001*cm);
+                                p_sensDetecDepth);
 
    logicSiPM = new G4LogicalVolume(solidSiPM,
                                    sipmMat,
@@ -423,6 +433,24 @@ G4VPhysicalVolume* qCalDetectorConstruction::Construct()
    quartzWrap->SetMaterialPropertiesTable(quartzWrapMPT);
    //negHalfDetSize = -((((p_nZAxis)*(((p_fQuartzDepth + p_fAbsLen)) + (0.002*cm) + (p_PMTBackDim))) + (0.25*cm))/2);
    //G4cout << "Post Creation = " << negHalfDetSize << G4endl;
+   p_fscaleZ = 2*(((p_fQuartzDepth + p_fAbsLen)) + (p_sensDetecDepth) + (p_PMTBackDim))/cm;
+   /*
+   G4cout << "p_fCubeWidth: " << p_fCubeWidth << G4endl;
+   G4cout << "p_fQuartzDepth: " << p_fQuartzDepth << G4endl;
+   G4cout << "p_fAbsXDim: " << p_fAbsXDim << G4endl;
+   G4cout << "p_fAbsYDim: " << p_fAbsYDim<< G4endl;
+   G4cout << "p_fAbsZDim: " << ((p_nZAxis)*(((p_fQuartzDepth + p_fAbsLen))))<< G4endl;
+   G4cout << "p_SiPMDim : " << p_SiPMDim  << G4endl;
+   G4cout << "p_PMTBackDim: " << p_PMTBackDim << G4endl;
+   G4cout << "p_fscaleZ: " <<p_fscaleZ << G4endl;
+   G4cout << "negHalfDetSize: " << negHalfDetSize  << G4endl;
+   G4cout << "p_sdCubeSize: " << p_sdCubeSize  << G4endl;
+   G4cout << "FULLDETECTORXYZ: " << 2*(((p_fQuartzDepth + p_fAbsLen)) + (p_sensDetecDepth) + (p_PMTBackDim))  << G4endl;
+   G4cout << "solidfinalabsorber:" << (((p_fQuartzDepth + p_fAbsLen))+(2*p_PMTBackDim)) << G4endl;
+   G4cout << "solidfulldetector:" << ((((p_fQuartzDepth + p_fAbsLen))+(p_PMTBackDim)))*(p_nZAxis)<< G4endl;
+   G4cout << "p_foffsetZ:  " << p_foffsetZ << G4endl;
+   G4cout << "p_fscaleZ:  " << p_fscaleZ  << G4endl;
+   */
    return physWorld;
 }
 
@@ -438,20 +466,27 @@ void qCalDetectorConstruction::ConstructSDandField()
 }
 
 G4int qCalDetectorConstruction::RawCoordsToSiPMNumber(const G4ThreeVector &raw){
+   //G4cout << "(COORD-off)/scale: " << (raw-G4ThreeVector(0,0,p_foffsetZ))/p_fscaleZ << G4endl;
    // The raw coordinatates are first offset and scaled to integer coordinates (rx, ry, rz) centered at (0,0,0),
    // These are the coordinates output root files which allow negative component values,
    // The offset and scale factors derive from SiPM dimensions in the detector construction
    G4int nXAxisIsEven = 1 - p_nXAxis%2;
    G4int nYAxisIsEven = 1 - p_nYAxis%2;
    G4int nZAxisIsEven = 1 - p_nZAxis%2;
-   G4double rx = raw.getX() / (p_sdCubeSize) +0.5 * nXAxisIsEven;
-   G4double ry = raw.getY() / (p_sdCubeSize) +0.5 * nYAxisIsEven;
-   G4double rz = (raw.getZ() - p_foffsetZ )/p_fscaleZ -nZAxisIsEven;
+   G4double rx = raw.getX() / (p_sdCubeSize/p_nXAxis) + 0.5 * nXAxisIsEven;
+   G4double ry = raw.getY() / (p_sdCubeSize/p_nYAxis) + 0.5 * nYAxisIsEven;
+   G4double rz = (raw.getZ() - p_foffsetZ )/p_fscaleZ - nZAxisIsEven;
    // (rx, ry, rz) are then re-centered in a detector corner so that all components are positive:
    int vol = (p_nXAxis * p_nYAxis * p_nZAxis);
    G4double cx = (rx + floor(0.5*p_nXAxis));
    G4double cy = ry + floor(0.5*p_nYAxis);
    G4double cz = rz + floor(0.5*p_nZAxis);
    // The output id value counts the SiPMs layer-wise from the starting corner:
-   return (int)round(cx + p_nXAxis*cy + p_nXAxis*p_nYAxis*cz)%vol;
+   //G4cout << "raw-off: " << (raw.getZ()-p_foffsetZ)/1.202<< G4endl;
+   //G4cout << "Fixed: " <<  G4ThreeVector(rx, ry, rz)  << G4endl;
+   //G4cout << "Shifted:" << G4ThreeVector(cx, cy, cz) << G4endl;
+   //G4cout << "p_fscaleZ:  " << p_fscaleZ  << G4endl;
+   //G4cout << "RESULT: " << (int)round(cx + p_nXAxis*cy + p_nXAxis*p_nYAxis*cz) << G4endl;
+   return (int)round(cx + p_nXAxis*cy + p_nXAxis*p_nYAxis*cz);
+   return 1;
 }
