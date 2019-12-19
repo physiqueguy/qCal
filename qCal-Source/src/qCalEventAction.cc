@@ -180,7 +180,7 @@ void qCalEventAction::EndOfEventAction(const G4Event* anEvent)
             if (IDofHit == id)
             {
                analysisManager->FillH1(0, hit->GetTime());
-           }
+            }
          }
          G4int nHistEntries = analysisManager->GetH1(0)->all_entries();
          auto maxModeLength = (int)analysisManager->GetH1(0)->max_bin_height();

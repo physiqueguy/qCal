@@ -1,3 +1,4 @@
+
 #include "qCalDetectorConstruction.hh"
 #include "qCalSD.hh"
 
@@ -43,7 +44,7 @@ qCalDetectorConstruction::qCalDetectorConstruction(G4int nXAxis,                
    p_sAbs = sAbs;                                                                                  //Absorber element
    p_fCubeWidth = 56*mm;    //fCubeWidth * cm;                                                     //Width of a single cube
    p_fQuartzSpacing = 0.0; //0.001*cm;                                                             //Width between x-cubes (circuit board + sipm)
-   p_fWrapSize = 0.025*cm; //0.001*cm;                                                             //Width of the tyvek wrapping
+   p_fWrapSize = 0.0; //0.025*cm; //0.001*cm;                                                             //Width of the tyvek wrapping
    p_fAbsXDim = ((p_fCubeWidth + 2 * p_fWrapSize + p_fQuartzSpacing) * p_nXAxis) / 2;              //Detector X coord center
    p_fAbsYDim = ((p_fCubeWidth + 2 * p_fWrapSize + p_fQuartzSpacing) * p_nYAxis) / 2;              //Detector Y coord Center
    p_fAbsZDim = ((p_fCubeWidth + 2 * p_fWrapSize + p_fQuartzSpacing + p_fAbsLen) * p_nZAxis) / 2;  //Detector Z coord Center
@@ -201,13 +202,13 @@ G4VPhysicalVolume* qCalDetectorConstruction::Construct()
                                    0.5*p_fCubeWidth,
                                    0.5*p_fCubeWidth,
                                    0.5*p_PMTBackDim);
-   
+
    G4LogicalVolume* logicPMTBack = new G4LogicalVolume(solidPMTBack,
                                                        airMat,
                                                        "logicPMTBack");
-   
+
    G4double PMTBackZCoord = 0 - ((p_quartzDepth+p_PMTBackDim) / 2 +(0.002*cm));
-   
+
    G4ThreeVector PMTBackPos = G4ThreeVector(0,0,PMTBackZCoord);
 
    ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -283,31 +284,31 @@ G4VPhysicalVolume* qCalDetectorConstruction::Construct()
    //Create an absorber behind the XYDir pixel
    ////////////////////////////////////////////////////////////////////////////////////////////////
    G4Box* solidAbsorber                = new G4Box("SingleAbsorber",
-                                                (cubeSize)*(p_nXAxis),
-                                                (cubeSize)*(p_nYAxis),
-                                                fAbsRadLen);
+                                                   (cubeSize)*(p_nXAxis),
+                                                   (cubeSize)*(p_nYAxis),
+                                                   fAbsRadLen);
 
    G4Box* solidFinalAbsorber           = new G4Box("FullAbs",
-                                                (cubeSize)*(p_nXAxis),
-                                                (cubeSize)*(p_nYAxis),
-                                                (((p_quartzDepth + fAbsRadLen))+ 0.25*cm +(p_PMTBackDim/2)));
+                                                   (cubeSize)*(p_nXAxis),
+                                                   (cubeSize)*(p_nYAxis),
+                                                   (((p_quartzDepth + fAbsRadLen)) - 4.85*mm +(p_PMTBackDim/2)));
 
    G4Box* solidFullDetector            = new G4Box("FullDetectorSolid",
-                                               (cubeSize)*(p_nXAxis),
-                                               (cubeSize)*(p_nYAxis),
-                                               (((p_quartzDepth + fAbsRadLen))+ 0.25*cm +(p_PMTBackDim/2))*(p_nZAxis));
+                                                   (cubeSize)*(p_nXAxis),
+                                                   (cubeSize)*(p_nYAxis),
+                                                   (((p_quartzDepth + fAbsRadLen)) - 4.85*mm +(p_PMTBackDim/2))*(p_nZAxis));
 
    G4LogicalVolume* logicAbsorber      = new G4LogicalVolume(solidAbsorber,
-                                                          absMat,
-                                                          "logicAbsorber");
+                                                             absMat,
+                                                             "logicAbsorber");
 
    G4LogicalVolume* logicFinal         = new G4LogicalVolume(solidFinalAbsorber,
-                                                     airMat,
-                                                     "logicFinal");
+                                                             airMat,
+                                                             "logicFinal");
 
    G4LogicalVolume* logicFullDetector  = new G4LogicalVolume(solidFullDetector,
-                                                            airMat,
-                                                            "logicFinal");
+                                                             airMat,
+                                                             "logicFinal");
 
 
    G4ThreeVector absPos = G4ThreeVector(0,
@@ -343,7 +344,7 @@ G4VPhysicalVolume* qCalDetectorConstruction::Construct()
                    logicFullDetector,           //Mother volume
                    kZAxis,                      //Axis of replication
                    (p_nZAxis),                  //Number of replica
-                   (((p_quartzDepth + fAbsRadLen))+ 0.25*cm +(p_PMTBackDim/2))*2); //Width of replica
+                   (((p_quartzDepth + fAbsRadLen))+ 0.0 -4.85*mm +(p_PMTBackDim/2))*2); //Width of replica
 
    new G4PVPlacement(nullptr,                   //no rotation
                      G4ThreeVector(0, 0, 0),    //at (0,0,0)
@@ -390,7 +391,7 @@ G4VPhysicalVolume* qCalDetectorConstruction::Construct()
    ////////////////////////////////////////////////////////////////////////////////////////////////
    G4OpticalSurface *quartzWrap = new G4OpticalSurface("QuartzWrap");
    G4LogicalSkinSurface *quartzSurface = new G4LogicalSkinSurface("QuartzSurface", logicQuartz, quartzWrap);
-   quartzWrap->SetType(dielectric_metal); 
+   quartzWrap->SetType(dielectric_metal);
    quartzWrap->SetModel(unified);
    quartzWrap->SetFinish(polished);
 
@@ -440,3 +441,4 @@ G4int qCalDetectorConstruction::RawCoordsToSiPMNumber(const G4ThreeVector &raw){
    // The output id value counts the SiPMs layer-wise from the starting corner:
    return (int)round(cx + p_nXAxis*cy + p_nXAxis*p_nYAxis*cz);
 }
+
